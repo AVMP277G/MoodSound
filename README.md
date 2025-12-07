@@ -1,4 +1,4 @@
-# Proyecto: Módulo MoodSound 
+# Proyecto: MoodSound 
 
 ## Descripción
 
