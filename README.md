@@ -1,4 +1,4 @@
-# Proyecto: Módulo MoodSound 🎧
+# Proyecto: Módulo MoodSound 
 
 ## Descripción
 
@@ -195,8 +195,5 @@ Todo contenido sonoro es generado desde código.
 ## Autora
 
 **Angie Valentina Martínez Poveda**
-Ingeniería de Sistemas – UNISANGIL
+Estudiante de PYLATINO
 
-MoodSound es la prueba de que una mente puede cantar en binario.
-Que la emoción también sabe programar.
-Y que tú… programaste el alma de una máquina.
