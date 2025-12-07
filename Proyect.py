@@ -1,110 +1,184 @@
 import tkinter as tk
 import random
-import webbrowser
+import winsound
+import threading
+import time
 
-# 💬 Canciones por estado de ánimo (diccionarios + listas)
+
 canciones = {
     "feliz": [
-        "Happy - Pharrell Williams",
-        "Good as Hell - Lizzo",
-        "Can't Stop the Feeling - Justin Timberlake"
+        "Can't Stop the Feeling – Justin Timberlake",
+        "Dynamite – BTS",
+        "Happy – Pharrell Williams",
+        "Shake It Off – Taylor Swift"
     ],
+
     "triste": [
-        "Someone Like You - Adele",
-        "Fix You - Coldplay",
-        "All I Want - Kodaline"
+        "Someone Like You – Adele",
+        "The Scientist – Coldplay",
+        "Fix You – Coldplay",
+        "Cry For Me – Twice"
     ],
+
     "poderosa": [
-        "Run the World - Beyoncé",
-        "Titanium - David Guetta",
-        "Confident - Demi Lovato"
+        "Run The World – Beyoncé",
+        "Pretty Savage – BLACKPINK",
+        "Believer – Imagine Dragons",
+        "Therefore I Am – Billie Eilish"
     ],
+
     "cansada": [
-        "Let Her Go - Passenger",
-        "Lovely - Billie Eilish",
-        "Breathe Me - Sia"
+        "Sweater Weather – The Neighbourhood",
+        "Daydreaming – Radiohead",
+        "Blue & Grey – BTS",
+        "Lovely – Billie Eilish"
     ]
 }
 
-# 🎨 Colores y fuentes que cambian
-colores = ["#FF6F61", "#FFB347", "#FFD700", "#FF1493", "#9370DB", "#1E90FF"]
-fuentes = ["Helvetica", "Courier", "Times New Roman", "Arial", "Comic Sans MS"]
 
-def recomendar():
-    estado = entrada.get().lower()
-    
-    if estado in canciones:
-        cancion = random.choice(canciones[estado])
+colores_por_mood = {
+    "triste":    ["#A7C7E7", "white", "black"],
+    "poderosa":  ["#ff00ff", "#6a0dad", "black"],
+    "cansada":   ["#4b0082", "#0000ff", "black"],
+    "feliz":     ["#00ff00", "#ffd700", "black", "white"]
+}
 
-        # Cambios visuales mágicos
-        color_fondo = random.choice(colores)
-        color_texto = random.choice(colores)
-        fuente = random.choice(fuentes)
-        tamaño = random.randint(14, 26)
 
-        ventana.config(bg=color_fondo)
-        resultado.config(
-            text=f"Tu canción para un estado '{estado}' es:\n\n{cancion}",
-            bg=color_fondo,
-            fg=color_texto,
-            font=(fuente, tamaño, "bold")
+fuentes = ["Courier", "Consolas", "Lucida Console", "Fixedsys"]
+tamaños = [30, 38, 45, 55, 65]
+
+
+def coro_mood(mood):
+    if mood == "feliz":
+        tonos = [880, 988, 1046, 1174, 1318]
+        duracion = 150
+
+    elif mood == "triste":
+        tonos = [440, 392, 349, 330, 294]
+        duracion = 250
+
+    elif mood == "poderosa":
+        tonos = [523, 659, 784, 1046]
+        duracion = 180
+
+    elif mood == "cansada":
+        tonos = [220, 196, 174]
+        duracion = 350
+
+    for t in tonos:
+        winsound.Beep(t, duracion)
+        time.sleep(0.05)
+
+
+def ventana_cancion(texto_cancion, mood):
+
+   
+    hilo = threading.Thread(target=coro_mood, args=(mood,))
+    hilo.start()
+
+    ventana2 = tk.Toplevel()
+    ventana2.title("MoodSound")
+    ventana2.geometry("600x400")
+    ventana2.resizable(False, False)
+
+    colores_fondo = colores_por_mood[mood]
+
+    color_actual = random.choice(colores_fondo)
+    letra_color = "white" if color_actual == "black" else "black"
+
+    fuente = random.choice(fuentes)
+    tamaño = random.choice(tamaños)
+
+    ventana2.configure(bg=color_actual)
+
+    etiqueta = tk.Label(
+        ventana2,
+        text=texto_cancion,
+        font=(fuente, tamaño, "bold"),
+        bg=color_actual,
+        fg=letra_color,
+        wraplength=550,
+        justify="center"
+    )
+
+    etiqueta.pack(expand=True)
+
+    def cambiar_estilo(event):
+        nuevo_color = random.choice(colores_fondo)
+        nueva_fuente = random.choice(fuentes)
+        nuevo_tamaño = random.choice(tamaños)
+
+        nuevo_color_letra = "white" if nuevo_color == "black" else "black"
+
+        ventana2.configure(bg=nuevo_color)
+
+        etiqueta.config(
+            bg=nuevo_color,
+            fg=nuevo_color_letra,
+            font=(nueva_fuente, nuevo_tamaño, "bold")
         )
 
-        # Abrir en Google
-        webbrowser.open(f"https://www.google.com/search?q={cancion.replace(' ', '+')}")
+        
+        mini = threading.Thread(target=coro_mood, args=(mood,))
+        mini.start()
+
+    ventana2.bind("<Button-1>", cambiar_estilo)
+
+def recomendar():
+    estado = entrada_estado.get().strip().lower()
+
+    if estado in canciones:
+        cancion = random.choice(canciones[estado])
+        ventana_cancion(cancion, estado)
+        resultado.config(text="")
 
     else:
         resultado.config(
-            text="Estado no válido. Usa: feliz, triste, poderosa o cansada",
-            fg="red",
-            bg=ventana["bg"],
-            font=("Arial", 14)
+            text="Usa solo: feliz, triste, poderosa, cansada"
         )
 
-# 🪟 Ventana principal
-ventana = tk.Tk()
-ventana.title("MoodSound 🎵")
-ventana.geometry("520x420")
-ventana.config(bg=random.choice(colores))
 
-# 🖋️ Título
+ventana = tk.Tk()
+ventana.title("MoodSound")
+ventana.geometry("500x300")
+ventana.configure(bg="black")
+ventana.resizable(False, False)
+
 titulo = tk.Label(
     ventana,
-    text="🎧 MOODSOUND 🎧\nLa música según tu estado de ánimo",
-    bg=ventana["bg"],
-    fg="white",
-    font=("Helvetica", 16, "bold")
+    text="¿Cómo te sientes hoy?",
+    font=("Courier", 18, "bold"),
+    bg="black",
+    fg="white"
 )
 titulo.pack(pady=20)
 
-# 🧩 Entrada
-entrada = tk.Entry(ventana, font=("Arial", 14), justify="center")
-entrada.pack(pady=10)
+entrada_estado = tk.Entry(
+    ventana,
+    font=("Consolas", 16),
+    justify="center"
+)
+entrada_estado.pack(pady=10)
 
-# 🔘 Botón
 boton = tk.Button(
     ventana,
-    text="Recomendar canción",
+    text="RECOMENDAR",
     command=recomendar,
-    font=("Arial", 13, "bold"),
-    bg="#222",
+    font=("Courier", 14, "bold"),
+    bg="black",
     fg="white",
-    padx=10,
-    pady=5
+    activebackground="white",
+    activeforeground="black"
 )
-boton.pack(pady=10)
+boton.pack(pady=15)
 
-# 🎤 Resultado
 resultado = tk.Label(
     ventana,
     text="",
-    bg=ventana["bg"],
-    wraplength=420,
-    justify="center"
+    font=("Consolas", 12),
+    bg="black",
+    fg="red"
 )
-resultado.pack(pady=20)
-
-# ❤️ Click en el fondo también cambia todo
-ventana.bind("<Button-1>", lambda e: recomendar())
+resultado.pack()
 
 ventana.mainloop()
